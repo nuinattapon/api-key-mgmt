@@ -6,10 +6,21 @@ POST http://localhost:3000/api/apikeys
 Content-Type: application/json; charset=utf-8
 
 {
-    "name": "Nui Sub-Anake",
-    "key" : "nui.s@pm.me"
+    "name": "cloud-api-key",
+    "key" : "cloud-api-key"
 }
 
+###
+GET http://localhost:3000/api/apikeys/9
 
 ###
-DELETE http://localhost:3000/api/apikeys
+DELETE http://localhost:3000/api/apikeys/2
+
+###
+PUT http://localhost:3000/api/apikeys/9
+Content-Type: application/json; charset=utf-8
+
+{
+    "name": "cloud-api-key-updated",
+    "key" : "cloud-api-key-updated"
+}

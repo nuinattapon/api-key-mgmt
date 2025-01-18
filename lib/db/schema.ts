@@ -1,7 +1,7 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, serial } from 'drizzle-orm/pg-core';
 
 export const apiKeys = pgTable('api_keys', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: serial("id").primaryKey(),
   name: text('name').notNull(),
   key: text('key').notNull().unique(),
   lastUsed: timestamp('last_used'),

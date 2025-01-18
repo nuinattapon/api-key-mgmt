@@ -11,7 +11,7 @@ export async function GET() {
       .orderBy(asc(apiKeys.id))
     return Response.json(allApiKeys)
   } catch (error) {
-    console.error("Error fetching comments:", error)
+    console.error("Error fetching API keys:", error)
     return Response.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
@@ -20,16 +20,15 @@ interface CreateApiKeyRequest {
   name: string
   key: string
 }
-// POST - Create a new comment
+// POST - Create a new apikey
 export async function POST(request: Request) {
   try {
     const body: CreateApiKeyRequest = await request.json()
-    const { name, key } = body
-    console.log({ name, key })
+
     // Validate required fields
     if (!body.key || !body.name) {
       return Response.json(
-        { error: "name, key are required" },
+        { error: "Name andkey are required" },
         { status: 400 }
       )
     }
@@ -41,7 +40,7 @@ export async function POST(request: Request) {
 
     return Response.json(newApiKey, { status: 201 })
   } catch (error) {
-    console.error("Error creating api key:", error)
+    console.error("Error creating API key:", error)
     return Response.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -49,4 +48,3 @@ export async function POST(request: Request) {
   }
 }
 
-export const dynamic = "force-dynamic"
