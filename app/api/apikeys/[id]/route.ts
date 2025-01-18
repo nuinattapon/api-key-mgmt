@@ -3,73 +3,84 @@ import { apiKeys } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { validateAndParseId } from "@/lib/utils"
 
+// Function to handle GET requests for fetching an API key by ID
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Validate and parse the ID from the request parameters
     const idOrResponse = await validateAndParseId(await params)
     if (idOrResponse instanceof Response) return idOrResponse // Return error response if validation fails
     const id: number = idOrResponse
 
-    // ดึงข้อมูล user และ posts โดยใช้ join
+    // Query the database for the API key with the specified ID
     const allApiKeys = await db.select().from(apiKeys).where(eq(apiKeys.id, id))
 
-    // ตรวจสอบว่าพบ user หรือไม่
+    // If no API key is found, return a 404 error response
     if (allApiKeys.length === 0) {
       return Response.json({ error: "API key not found" }, { status: 404 })
     }
+    // Return the found API key as a JSON response
     return Response.json(allApiKeys[0])
   } catch (error) {
-    // จัดการกับข้อผิดพลาด
+    // Handle any errors that occur during the process
     console.error("Error fetching an API key:", error)
     return Response.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
+// Function to handle DELETE requests for deleting an API key by ID
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Validate and parse the ID from the request parameters
     const idOrResponse = await validateAndParseId(await params)
     if (idOrResponse instanceof Response) return idOrResponse // Return error response if validation fails
     const id: number = idOrResponse
 
-    // ดึงข้อมูล user และ posts โดยใช้ join
+    // Delete the API key with the specified ID from the database
     const [deletedApiKey] = await db
       .delete(apiKeys)
       .where(eq(apiKeys.id, id))
       .returning()
 
-    // ตรวจสอบว่าพบ user หรือไม่
+    // If no API key is found to delete, return a 404 error response
     if (!deletedApiKey) {
       return Response.json({ error: "API key not found" }, { status: 404 })
     }
+    // Return a success message if the API key is deleted
     return Response.json({ message: "User deleted successfully" })
   } catch (error) {
-    // จัดการกับข้อผิดพลาด
+    // Handle any errors that occur during the process
     console.error("Error deleting an API key:", error)
     return Response.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
+// Interface for the request body when updating an API key
 interface UpdateApiKeyBody {
   name?: string
   key?: string
 }
+
+// Function to handle PUT requests for updating an API key by ID
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Validate and parse the ID from the request parameters
     const idOrResponse = await validateAndParseId(await params)
-    if (idOrResponse instanceof Response) return idOrResponse // Return error response if validation fails
+    if (idOrResponse instanceof Response) return idOrResponse
     const id = idOrResponse
-    // รับข้อมูลที่ต้องการอัพเดทจาก request body
+
+    // Parse the request body to get the update data
     const body: UpdateApiKeyBody = await request.json()
     const { name, key } = body
 
-    // ตรวจสอบว่ามีข้อมูลที่จะอัพเดทหรือไม่
+    // If neither name nor key is provided, return a 400 error response
     if (!name && !key) {
       return Response.json(
         { error: "Name or key is required for updating API key" },
@@ -77,27 +88,27 @@ export async function PUT(
       )
     }
 
-    // สร้าง object สำหรับเก็บข้อมูลที่จะอัพเดท
+    // Create an object to hold the update data
     const updateData: { name?: string; key?: string } = {}
     if (name) updateData.name = name
     if (key) updateData.key = key
 
-    // อัพเดทข้อมูล user ในฐานข้อมูล
+    // Update the API key in the database with the new data
     const [updatedApiKey] = await db
       .update(apiKeys)
       .set(updateData)
       .where(eq(apiKeys.id, id))
       .returning()
 
-    // ถ้าไม่พบ apikey ให้ส่ง response แจ้ง error
+    // If no API key is found to update, return a 404 error response
     if (!updatedApiKey) {
       return Response.json({ error: "API key not found" }, { status: 404 })
     }
 
-    // ส่ง response กลับไปพร้อมข้อมูล user ที่อัพเดทแล้ว
+    // Return the updated API key as a JSON response
     return Response.json(updatedApiKey)
   } catch (error) {
-    // จัดการกรณีเกิด error
+    // Handle any errors that occur during the process
     console.error("Error updating API key:", error)
     return Response.json({ error: "Internal Server Error" }, { status: 500 })
   }
