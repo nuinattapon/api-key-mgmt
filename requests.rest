@@ -1,0 +1,15 @@
+###
+GET http://localhost:3000/api/apikeys
+
+###
+POST http://localhost:3000/api/apikeys
+Content-Type: application/json; charset=utf-8
+
+{
+    "name": "Nui Sub-Anake",
+    "key" : "nui.s@pm.me"
+}
+
+
+###
+DELETE http://localhost:3000/api/apikeys
